@@ -15,6 +15,10 @@ typedef struct
     float Alarm;
 }FLOW_VALUE; 
 
+
+extern FLOW_VALUE xdata RealFlow[FLOW_METER_CNT];
+
+
 void SendReadFlow(BYTE ch);
 void ReadFlow(BYTE ch);
 void FlowMeterAck(BYTE *Buf, BYTE Len);

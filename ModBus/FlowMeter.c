@@ -3,11 +3,6 @@
 #include "LcdApp.h"
 #include "ModBusHost.h"
 
-extern HOST_SEND_FRAME xdata  HostSendFrame;   // 发送帧
-extern DEVICE_READ_ACK xdata  ReadAckFrame;    // 读接收帧
-extern DEVICE_WRITE_ACK xdata WriteAckFrame;  // 写接收帧
-
-
 FLOW_VALUE xdata RealFlow[FLOW_METER_CNT];
 
 

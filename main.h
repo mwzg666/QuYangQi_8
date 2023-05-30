@@ -155,14 +155,14 @@ typedef struct
 #define FANS_M(x)   (x)?(P5 |= (1<<0)):(P5 &= ~(1<<0))     //风扇控制
 #define ALARM(x)    (x)?(P3 |= (1<<4)):(P3 &= ~(1<<4))      // 报警音
 
-#define VALVE1(x)   (x)?(P4 |=(1<<1)):(P4 &= ~(1<<1))       //电磁阀1控制
-#define VALVE2(x)   (x)?(P4 |=(1<<2)):(P4 &= ~(1<<2))       //电磁阀2控制
-#define VALVE3(x)   (x)?(P4 |=(1<<3)):(P4 &= ~(1<<3))       //电磁阀3控制
-#define VALVE4(x)   (x)?(P4 |=(1<<4)):(P4 &= ~(1<<4))       //电磁阀4控制
-#define VALVE5(x)   (x)?(P2 |=(1<<0)):(P2 &= ~(1<<0))       //电磁阀5控制
-#define VALVE6(x)   (x)?(P2 |=(1<<1)):(P2 &= ~(1<<1))       //电磁阀6控制
-#define VALVE7(x)   (x)?(P2 |=(1<<2)):(P2 &= ~(1<<2))       //电磁阀7控制
-#define VALVE8(x)   (x)?(P2 |=(1<<3)):(P2 &= ~(1<<3))       //电磁阀8控制
+#define VALVE0(x)   (x)?(P4 |=(1<<1)):(P4 &= ~(1<<1))       //电磁阀0控制
+#define VALVE1(x)   (x)?(P4 |=(1<<2)):(P4 &= ~(1<<2))       //电磁阀1控制
+#define VALVE2(x)   (x)?(P4 |=(1<<3)):(P4 &= ~(1<<3))       //电磁阀2控制
+#define VALVE3(x)   (x)?(P4 |=(1<<4)):(P4 &= ~(1<<4))       //电磁阀3控制
+#define VALVE4(x)   (x)?(P2 |=(1<<0)):(P2 &= ~(1<<0))       //电磁阀4控制
+#define VALVE5(x)   (x)?(P2 |=(1<<1)):(P2 &= ~(1<<1))       //电磁阀5控制
+#define VALVE6(x)   (x)?(P2 |=(1<<2)):(P2 &= ~(1<<2))       //电磁阀6控制
+#define VALVE7(x)   (x)?(P2 |=(1<<3)):(P2 &= ~(1<<3))       //电磁阀7控制
 
 
 #define POWER_LOCK()      (P4 & (1<<0))                     // 开关机锁
@@ -204,9 +204,10 @@ void ParamDef();
 
 void Init();
 void SaveParam();
-void OpenValve();
-void CloseValve();
 
+void GetValve();
+void CheckValve();  
+void CloseValve();
 
 void OpenPump();
 void ClosePump();

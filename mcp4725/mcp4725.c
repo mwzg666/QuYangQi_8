@@ -23,7 +23,6 @@ void MCP4725_OutVol(BYTE addr,WORD voltage)
 
     uiVolTemp = voltage;
 
-	//_DINT();
 	uiVolTemp = uiVolTemp*4096l/MCP4725_REF_VOL;
 	I2C_Start(1);
 	out_data = addr<<1;
@@ -36,7 +35,6 @@ void MCP4725_OutVol(BYTE addr,WORD voltage)
 	I2C_Write_Byte(1);
 	I2C_ReadAck(1);
 	I2C_Stop(1);
-    //_EINT();
 }
 
 #if 0

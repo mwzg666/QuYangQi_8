@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  ModBusDev                                                          30/05/23  09:10:23  PAGE 1   
+C251 COMPILER V5.60.0,  ModBusDev                                                          30/05/23  15:37:48  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE ModBusDev
@@ -66,7 +66,7 @@ stmt  level    source
    55   1          DWORD temp;
    56   1          temp = SwEndian(val);
    57   1          memcpy(&DevReadAck.Data[Offset], &temp, 4);  
-C251 COMPILER V5.60.0,  ModBusDev                                                          30/05/23  09:10:23  PAGE 2   
+C251 COMPILER V5.60.0,  ModBusDev                                                          30/05/23  15:37:48  PAGE 2   
 
    58   1      }
    59          
@@ -134,7 +134,7 @@ stmt  level    source
   121          BYTE ReadAck(BYTE Mode)
   122          {
   123   1          WORD i = 0;
-C251 COMPILER V5.60.0,  ModBusDev                                                          30/05/23  09:10:23  PAGE 3   
+C251 COMPILER V5.60.0,  ModBusDev                                                          30/05/23  15:37:48  PAGE 3   
 
   124   1          WORD crc,SendLen;
   125   1          memset(&DevReadAck, 0, sizeof(DEVICE_READ_ACK));
@@ -202,7 +202,7 @@ stmt  level    source
   187          {
   188   1          BYTE *p;
   189   1          int len,offset;
-C251 COMPILER V5.60.0,  ModBusDev                                                          30/05/23  09:10:23  PAGE 4   
+C251 COMPILER V5.60.0,  ModBusDev                                                          30/05/23  15:37:48  PAGE 4   
 
   190   1          
   191   1          // –¥…Ë±∏µÿ÷∑
@@ -270,7 +270,7 @@ stmt  level    source
   253   2          }
   254   1      
   255   1          memset(&RecvFrame, 0, sizeof(HOST_SEND_FRAME));
-C251 COMPILER V5.60.0,  ModBusDev                                                          30/05/23  09:10:23  PAGE 5   
+C251 COMPILER V5.60.0,  ModBusDev                                                          30/05/23  15:37:48  PAGE 5   
 
   256   1          memcpy(&RecvFrame, buf, len);
   257   1          if (RecvFrame.Address != SysParam.Address)

@@ -80,6 +80,7 @@ void StartButton()
     dat = PopWord();
     if (dat == BUTTON_OK)
     {
+        
         StartSamp();
         NeedGetRet = true;
     }    

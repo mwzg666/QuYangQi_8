@@ -46,9 +46,16 @@ typedef struct
     WORD RegCount;
     WORD Crc;
 }DEVICE_WRITE_ACK;
-  
-#pragma pack()
 
+
+
+extern HOST_SEND_FRAME xdata  HostSendFrame;   // 发送帧
+extern DEVICE_READ_ACK xdata  ReadAckFrame;    // 读接收帧
+extern DEVICE_WRITE_ACK xdata WriteAckFrame;  // 写接收帧
+
+
+
+#pragma pack()
 
 WORD CRC16Calc(BYTE *dataBuff, DWORD dataLen);
 void FloatToBytes(float dat, BYTE *res);

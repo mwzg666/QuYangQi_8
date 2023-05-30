@@ -12,6 +12,8 @@
 BYTE code VERSION = 100;  // V1.0.0
 
 BYTE xdata StrTmp[64] = {0};
+BYTE xdata Valve[8] = {0};
+
 BYTE ChannelError[FLOW_METER_CNT] ={0};
 
 #define Log //((CSampDemoDlg *)theApp.m_pMainWnd)->AddLog
@@ -41,38 +43,6 @@ BYTE g_Key_Input  = 0;
 BYTE Input_Status = 0;
 
 WORD gRunTime = 0;
-
-
-extern u8  TX1_Cnt;    //发送计数
-extern u8  RX1_Cnt;    //接收计数
-extern bit B_TX1_Busy; //发送忙标志
-extern u16 Rx1_Timer;
-
-extern u8  TX2_Cnt;    //发送计数
-extern u8  RX2_Cnt;    //接收计数
-extern bit B_TX2_Busy; //发送忙标志
-extern u16 Rx2_Timer;
-
-extern u8  RX3_Cnt;    //接收计数
-extern u8  TX3_Cnt;    //发送计数
-extern bit B_TX3_Busy; //发送忙标志
-extern u16 Rx3_Timer;
-
-extern u8  RX4_Cnt;    //接收计数
-extern u8  TX4_Cnt;    //发送计数
-extern bit B_TX4_Busy; //发送忙标志
-extern u16 Rx4_Timer;
-
-
-extern u8  xdata RX2_Buffer[]; //接收缓冲
-extern u8  xdata RX3_Buffer[]; //接收缓冲
-
-
-extern FLOW_VALUE xdata RealFlow[FLOW_METER_CNT];
-
-
-
-
 
 void DebugMsg(char *msg)
 {
@@ -237,7 +207,6 @@ void OutCtl(alt_u8 id, alt_u8 st)
         
         case GAS_BUMP:      //泵
         {
-            OpenValve();
             (st)? BUMP_M(1) : BUMP_M(0);
             break;
         }
@@ -752,7 +721,7 @@ void StartSamp()
 
     RunStatus.Running = true;
     g_Output[LIGHT_BLUE] = 1;
-
+    GetValve();
     OpenPump();
     SetStartBtn(0);
 
@@ -910,39 +879,80 @@ void MainTask()
 }
 */
 
-
-void OpenValve()
+void GetValve()
 {
-    VALVE1(1);
-    VALVE2(1);
-    VALVE3(1);
-    VALVE4(1);
-    VALVE5(1);
-    VALVE6(1);
-    VALVE7(1);
-    VALVE8(1);
+    BYTE i;
+    for(i = 0;i<CHANNLE_NUM;i++)
+    {
+        if(SysParam.Enable & (1<<i))
+        {
+           Valve[i] = 1;
+        }
+        else
+        {
+            Valve[i] = 0;
+        }
+    }
+    CheckValve();
+}
+
+
+
+//开启或关闭通道电磁阀
+void CheckValve()
+{
+    BYTE i;
+    for(i = 0;i<CHANNLE_NUM;i++)
+    {
+        if(Valve[i])
+        {
+            switch(i)
+            {
+                case 0 : VALVE0(1); break;
+                case 1 : VALVE1(1); break;
+                case 2 : VALVE2(1); break;
+                case 3 : VALVE3(1); break;
+                case 4 : VALVE4(1); break;
+                case 5 : VALVE5(1); break;
+                case 6 : VALVE6(1); break;
+                case 7 : VALVE7(1); break;  
+            }
+        }
+        else
+        {
+            switch(i)
+            {
+                case 0 : VALVE0(0); break;
+                case 1 : VALVE1(0); break;
+                case 2 : VALVE2(0); break;
+                case 3 : VALVE3(0); break;
+                case 4 : VALVE4(0); break;
+                case 5 : VALVE5(0); break;
+                case 6 : VALVE6(0); break;
+                case 7 : VALVE7(0); break;  
+            }
+        }
+    }
     Delay(20);
 }
 
 void CloseValve()
 {
-    VALVE1(0);
-    VALVE2(0);
-    VALVE3(0);
+    VALVE0(0);
+    VALVE1(0);
+    VALVE2(0);
+    VALVE3(0);
     VALVE4(0);
     VALVE5(0);
     VALVE6(0);
     VALVE7(0);
-    VALVE8(0);
     Delay(20);
+
 }
-
-
 // 开启气泵
 void OpenPump()
 {
     //BUMP_M(1);
-    OpenValve();
     g_Output[GAS_BUMP] = 1;
 }
 
@@ -1099,7 +1109,7 @@ void main(void)
     {
         TimerTask();
         HndInput();
-
+        
         Uart1Hnd();
         Uart2Hnd();
         Uart3Hnd();
