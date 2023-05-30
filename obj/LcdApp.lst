@@ -1,0 +1,484 @@
+C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE LcdApp
+OBJECT MODULE PLACED IN .\obj\LcdApp.obj
+COMPILER INVOKED BY: D:\KeilMDK\C251\BIN\C251.EXE Lcd\LcdApp.c XSMALL OPTIMIZE(0,SPEED) BROWSE INCDIR(.\Ads1110;.\Flash;
+                    -.\mcp4725;.\IIC;.\MwPro;.\Uart;.\Lcd;.\ModBus;.\Temperaturn) PRINT(.\obj\LcdApp.lst) OBJECT(.\obj\LcdApp.obj) 
+
+stmt  level    source
+
+    1          //#include "pch.h"
+    2          
+    3          #include "main.h"
+    4          #include "Lcd.h"
+    5          #include "LcdApp.h"
+    6          #include "Temper.h"
+    7          
+    8          
+    9          //#include "SerialPort.h"
+   10          //#include "SampDemo.h"
+   11          //#include "SampDemoDlg.h"
+   12          
+   13          #define Log //((CSampDemoDlg *)theApp.m_pMainWnd)->AddLog
+   14          
+   15          #define TEMP_BUF_LEN  128
+   16          BYTE xdata TempBuf[TEMP_BUF_LEN] = {0};
+   17          
+   18          SHOW_PARAM xdata ShowParam;
+   19          RUN_INFO xdata RunInfo;
+   20          DEV_INFO xdata DevInfo;
+   21          
+   22          bool NeedGetRet = false;
+   23          
+   24          char xdata ChannelStatus[CHANNLE_NUM][16] = {0};   // ×´Ì¬ÎÄ×Ö
+   25          BYTE ChannelAlarm[CHANNLE_NUM] = {1,1,1,1,1,1,1,1};   // Ä¬ÈÏ×´Ì¬Õý³£
+   26          BYTE HisAlarm[CHANNLE_NUM] = {1,1,1,1,1,1,1,1};
+   27          
+   28          extern BYTE code VERSION;
+   29          
+   30          WORD code StatusPoint[CHANNLE_NUM] = 
+   31          {
+   32              0xA000,0xA100,0xA200,0xA300,0xA400,0xA500,0xA600,0xA700
+   33          };
+   34          
+   35          WORD code TxtColor[5] = 
+   36          {
+   37              //½ûÓÃ    Õý³£    Á÷Á¿µÍ     Á÷Á¿¸ß     Òì³£
+   38              //°×É«    »ÆÉ«     ºìÉ«     ºìÉ«      ºìÉ«
+   39              0xFFFF,0xFFE0,0xF800,0xF800,0xF800
+   40          };
+   41          
+   42          char code ModeText[4][16]=
+   43          {   
+   44              "",
+   45              "¶¨Ê±È¡Ñù",
+   46              "¶¨Á¿È¡Ñù",
+   47              "ÊÖ¶¯È¡Ñù"
+   48          };
+   49          
+   50          
+   51          
+   52          
+   53          
+   54          void ShowDevInfo()
+   55          {
+   56   1          BYTE i,Cnt = 0;;
+   57   1          for (i=0;i<8;i++)
+   58   1          {
+C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 2   
+
+   59   2              if (SysParam.Enable & (1<<i))
+   60   2              {
+   61   3                  Cnt ++;
+   62   3              }
+   63   2          }
+   64   1          memset(&DevInfo, 0, sizeof(DEV_INFO));
+   65   1          sprintf(DevInfo.DevType,"MNNA-1/%d",Cnt);
+   66   1      
+   67   1          sprintf(DevInfo.SoftVer,"V%d.%d.%d", VERSION/100, VERSION%100/10, VERSION%10 );
+   68   1          LcdCmd(LCD_CMD_WRITE, REG_DEV_TYPE, (BYTE *)&DevInfo, 32);
+   69   1      }
+   70          
+   71          // Æô¶¯½çÃæ¿ªÊ¼°´Å¥
+   72          void StartButton()
+   73          {
+   74   1          WORD dat;
+   75   1          if (!CheckDataLen(1))
+   76   1          {
+   77   2              return;
+   78   2          }
+   79   1      
+   80   1          dat = PopWord();
+   81   1          if (dat == BUTTON_OK)
+   82   1          {
+   83   2              StartSamp();
+   84   2              NeedGetRet = true;
+   85   2          }    
+   86   1      }
+   87          
+   88          
+   89          // ÐÞ¸ÄÖ÷½çÃæµÄÆôÍ£°´Å¥ 1£º¿ªÊ¼  0£ºÍ£Ö¹
+   90          void SetStartBtn(BYTE s)
+   91          {
+   92   1          TempBuf[0] = 0;
+   93   1          TempBuf[1] = s;
+   94   1          LcdCmd(LCD_CMD_WRITE, REG_DEV_CTL, TempBuf, 2);
+   95   1          
+   96   1      }
+   97          
+   98          // µÇÂ¼ÃÜÂë
+   99          void VerifyPassWord()
+  100          {
+  101   1          WORD PassWord;
+  102   1          if (!CheckDataLen(1))
+  103   1          {
+  104   2              return;
+  105   2          }
+  106   1      
+  107   1          PassWord = PopWord();
+  108   1          if (PassWord == LOGIN_PASSWORD)
+  109   1          {
+  110   2              EnterPage(PAGE_SET);
+  111   2              //Log(_T("µÇÂ¼³É¹¦\r\n"));
+  112   2          }    
+  113   1      }
+  114          
+  115          void ReturnStart()
+  116          {
+  117   1          WORD dat;
+  118   1          if (!CheckDataLen(1))
+  119   1          {
+  120   2              return;
+  121   2          }
+  122   1      
+  123   1          dat = PopWord();
+  124   1          if (dat == 0x31)    // ·µ»ØÈ·ÈÏ
+C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 3   
+
+  125   1          {
+  126   2              //TemSendFlag = false;
+  127   2              NeedGetRet = false;
+  128   2              
+  129   2              StopSamp(false);
+  130   2              Delay(200);
+  131   2              // Òª°Ñ±äÁ¿ÖØÐÂÐ´Îª0
+  132   2              memset(TempBuf,0,TEMP_BUF_LEN);
+  133   2              LcdCmd(LCD_CMD_WRITE, REG_RETRUN, TempBuf, 2);
+  134   2              Delay(200);
+  135   2              EnterPage(PAGE_START);
+  136   2              Delay(200);
+  137   2              
+  138   2          }   
+  139   1          else if (dat == 0x0D0A)
+  140   1          {
+  141   2              if (RunStatus.Running)
+  142   2              {
+  143   3                  StopSamp(false);
+  144   3              }
+  145   2              else
+  146   2              {
+  147   3                  StartSamp();
+  148   3              }
+  149   2      
+  150   2              // Òª°Ñ±äÁ¿ÖØÐÂÐ´Îª0
+  151   2              Delay(200);
+  152   2              memset(TempBuf,0,TEMP_BUF_LEN);
+  153   2              LcdCmd(LCD_CMD_WRITE, REG_RETRUN, TempBuf, 2);
+  154   2              
+  155   2          }
+  156   1           
+  157   1      }
+  158          
+  159          void GetRetCode()
+  160          {
+  161   1          BYTE len = 1;
+  162   1      
+  163   1          if (NeedGetRet)
+  164   1          {
+  165   2              LcdCmd(LCD_CMD_READ, REG_RETRUN, &len, 1);
+  166   2          }
+  167   1      }
+  168          
+  169          
+  170          void SampCtl()
+  171          {
+  172   1          WORD dat;
+  173   1          if (!CheckDataLen(1))
+  174   1          {
+  175   2              return;
+  176   2          }
+  177   1      
+  178   1          dat = PopWord();
+  179   1          if (dat == 0)
+  180   1          {
+  181   2              StartSamp();
+  182   2             
+  183   2          }  
+  184   1          else
+  185   1          {
+  186   2              StopSamp(false);
+  187   2              
+  188   2          }
+  189   1      
+  190   1          HideModule(MP_HINT_END);
+C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 4   
+
+  191   1         
+  192   1      }
+  193          
+  194          
+  195          // Ö÷½çÃæÈ¡ÑùÄ£Ê½ÌáÊ¾
+  196          void ModeHint()
+  197          {
+  198   1          memset(TempBuf,0,TEMP_BUF_LEN);
+  199   1          switch (SysParam.SampMode)
+  200   1          {
+  201   2              case MODE_TIME: sprintf((char *)TempBuf, "¶¨Ê±È¡Ñù:%d·ÖÖÓ" ,    SysParam.SampTime); break;
+  202   2              case MODE_VOL : sprintf((char *)TempBuf, "¶¨Á¿È¡Ñù:%.1fÁ¢·½Ã×" , SysParam.SampVol);  break;
+  203   2              case MODE_MAN : sprintf((char *)TempBuf, "ÊÖ¶¯È¡Ñù"); break;
+  204   2          }
+  205   1          
+  206   1          LcdCmd(LCD_CMD_WRITE, REG_MODEHINT, TempBuf, 32);
+  207   1          //Delay(200);
+  208   1          
+  209   1      }
+  210          
+  211          
+  212          // µ÷Õû×´Ì¬ÎÄ×ÖµÄÑÕÉ«
+  213          void StatusColor(bool force)
+  214          {
+  215   1          BYTE i;
+  216   1          for (i=0;i<CHANNLE_NUM;i++)
+  217   1          {
+  218   2              if ((ChannelAlarm[i] != HisAlarm[i]) || force)
+  219   2              {
+  220   3                  Delay(200);
+  221   3                  SetTextColor(StatusPoint[i], SwWord(TxtColor[ChannelAlarm[i]]));
+  222   3              }
+  223   2          }
+  224   1      }
+  225          
+  226          void SetRunTime(DWORD tm)
+  227          {
+  228   1          WORD h,m,s;
+  229   1          h = (WORD)(tm/3600);
+  230   1          m = (tm%3600)/60;
+  231   1          s = tm%60;
+  232   1          memset(RunInfo.RunTime,0,16);
+  233   1          sprintf((char *)RunInfo.RunTime, "%04d:%02d:%02d",h,m,s);
+  234   1          //WriteParam();
+  235   1      }
+  236          
+  237          void ShowFlow()
+  238          {
+  239   1          SetRunTime(RunStatus.RunTime);  // ÔËÐÐÊ±³¤
+  240   1          LcdCmd(LCD_CMD_WRITE, REG_CH_FLOW, (BYTE *)&RunInfo, sizeof(RUN_INFO));
+  241   1      }
+  242          
+  243          void ShowStatus()
+  244          {
+  245   1          BYTE i;
+  246   1          memset(ChannelStatus,0,sizeof(ChannelStatus));
+  247   1          for (i=0;i<CHANNLE_NUM;i++)
+  248   1          {
+  249   2              switch (ChannelAlarm[i])
+  250   2              {
+  251   3                  case ALM_CH_DISABLE:  sprintf(&ChannelStatus[i][0],"½ûÓÃ");               break;
+  252   3                  case ALM_FLOW_NOR:    sprintf(&ChannelStatus[i][0],"Õý³£");               break;
+  253   3                  case ALM_FLOW_LOW:    sprintf(&ChannelStatus[i][0],"Á÷Á¿Æ«Ð¡");             break;
+  254   3                  case ALM_FLOW_HIGH:   sprintf(&ChannelStatus[i][0],"Á÷Á¿Æ«´ó");             break;
+  255   3                  case ALM_FLOW_ABNOR:  sprintf(&ChannelStatus[i][0],"Í¨ÐÅÒì³£");             break;
+  256   3              }
+C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 5   
+
+  257   2          }
+  258   1      
+  259   1          LcdCmd(LCD_CMD_WRITE, REG_CH_STATUS, (BYTE *)ChannelStatus, 128);
+  260   1      }
+  261          
+  262          void ShowTemp(u16 TEMPER)
+  263          {
+  264   1          WORD i = TEMPER;
+  265   1          LcdCmd(LCD_CMD_WRITE, REG_IO_TEMP, (BYTE *)&i,2);
+  266   1      }
+  267          
+  268          void ShowEmStop(bool on)
+  269          {
+  270   1          WORD i = on;
+  271   1          LcdCmd(LCD_CMD_WRITE, REG_IO_EMSTOP, (BYTE *)&i,2);
+  272   1      }
+  273          
+  274          
+  275          
+  276          void SendParam()
+  277          {
+  278   1          BYTE i;
+  279   1          for (i=0;i<CHANNLE_NUM;i++)
+  280   1          {
+  281   2              ShowParam.Flow[i] = SwWord((WORD)(SysParam.SampFlow[i]*10));
+  282   2          }
+  283   1          ShowParam.Address = SwWord((WORD)SysParam.Address);
+  284   1          ShowParam.SampTime = SwWord((WORD)SysParam.SampTime);
+  285   1          ShowParam.SampVol = SwWord((WORD)(SysParam.SampVol*10));
+  286   1          ShowParam.BkLight = SwWord((WORD)SysParam.BkLight);
+  287   1          ShowParam.AlarmThres = SwWord((WORD)SysParam.AlarmThres);
+  288   1          ShowParam.SampMode = SwWord((WORD)SysParam.SampMode);
+  289   1          ShowParam.ChOnOff = SwWord((WORD)SysParam.Enable);
+  290   1      
+  291   1          memset(ShowParam.ModeTxt,0,16);
+  292   1          sprintf(ShowParam.ModeTxt, ModeText[SysParam.SampMode]);
+  293   1          
+  294   1          LcdCmd(LCD_CMD_WRITE, REG_SYS_PARAM, (BYTE *)&ShowParam, sizeof(SHOW_PARAM));
+  295   1      }
+  296          
+  297          
+  298          // ÉèÖÃ½çÃæÏÔÊ¾È¡ÑùÄ£Ê½
+  299          void SetSampMode()
+  300          {
+  301   1          SysParam.SampMode = (BYTE)PopWord();
+  302   1          memset((char *)TempBuf,0,TEMP_BUF_LEN);
+  303   1          sprintf((char *)TempBuf, ModeText[SysParam.SampMode]);
+  304   1          LcdCmd(LCD_CMD_WRITE, REG_MODE_TXT, TempBuf, 16);
+  305   1      }
+  306          
+  307          
+  308          // »ñÈ¡ÐÞ¸ÄºóµÄÊ±¼ä
+  309          void GetInputTime()
+  310          {
+  311   1          BYTE len = 7;
+  312   1          NeedGetRet = true;
+  313   1          //Delay(300);
+  314   1          LcdCmd(LCD_CMD_READ, REG_DATE_TIME, &len, 1);
+  315   1      }
+  316          
+  317          // ÔÚÊ±¼äÉèÖÃ½çÃæÐ´Èëµ±Ç°Ê±¼ä
+  318          void SetCurTime()
+  319          {
+  320   1          LCD_FRAME *pFrame;
+  321   1          LCD_DATE_TIME  ldt;
+  322   1          
+C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 6   
+
+  323   1          BYTE dt[8] = {0};
+  324   1          pFrame = (LCD_FRAME *)&RecvBuf1[LcdFrameloc];
+  325   1          if (!CheckDataLen(4))
+  326   1          {
+  327   2              return;
+  328   2          }
+  329   1          
+  330   1          memcpy(dt, &pFrame->Data[1], 8);
+  331   1          
+  332   1          ldt.YearH = SwWord((WORD)(dt[0]/10));
+  333   1          ldt.YearL = SwWord((WORD)(dt[0]%10));
+  334   1          ldt.Month = SwWord((WORD)dt[1]);
+  335   1          ldt.Day   = SwWord((WORD)dt[2]);
+  336   1      
+  337   1          ldt.Hour   = SwWord((WORD)dt[4]);
+  338   1          ldt.Minute = SwWord((WORD)dt[5]);
+  339   1          ldt.Secend = SwWord((WORD)dt[6]);
+  340   1      
+  341   1          LcdCmd(LCD_CMD_WRITE, REG_DATE_TIME, (BYTE *)&ldt, sizeof(LCD_DATE_TIME));
+  342   1          
+  343   1      }
+  344          
+  345          
+  346          void SetChCount()
+  347          {
+  348   1          BYTE dat = (BYTE)PopWord();
+  349   1          BYTE i;
+  350   1      
+  351   1          SysParam.Enable = 0;
+  352   1          for (i=0;i<dat;i++)
+  353   1          {
+  354   2              SysParam.Enable |= (1<<i);
+  355   2          }
+  356   1      
+  357   1          ShowDevInfo();
+  358   1      }
+  359          
+  360          
+  361          
+  362          void ReadReg()
+  363          {
+  364   1          LCD_FRAME *pFrame = (LCD_FRAME *)&RecvBuf1[LcdFrameloc];
+  365   1          WORD addr = SwWord(pFrame->Addr);
+  366   1          
+  367   1          DebugInt(addr);
+  368   1          
+  369   1          switch (addr)
+  370   1          {
+  371   2              // Æô¶¯½çÃæ
+  372   2              case REG_STRART:   StartButton();        break;  // µã»÷¿ªÊ¼
+  373   2              case REG_PASSWORD: VerifyPassWord();     break;    // ÃÜÂë
+  374   2      
+  375   2              // Ö÷½çÃæ
+  376   2              case REG_DEV_CTL:  SampCtl();         break;  // ÆôÍ£¿ØÖÆ  
+  377   2              case REG_RETRUN:   ReturnStart();     break;  // ·µ»ØÆô¶¯Ò³Ãæ
+  378   2              case REG_TIME_BTN: GetLcdTime();      break;  // µã»÷Ê±¼ä
+  379   2              case REG_HINT_ENTER: HideModule(MP_HINT_END);    break;
+  380   2      
+  381   2              // ²ÎÊýÉèÖÃ½çÃæ
+  382   2              case REG_SP_FLOW1: SysParam.SampFlow[0] = ((float)PopWord())/10;   break; //0x4000
+  383   2              case REG_SP_FLOW2: SysParam.SampFlow[1] = ((float)PopWord())/10;break; //   0x4001
+  384   2              case REG_SP_FLOW3: SysParam.SampFlow[2] = ((float)PopWord())/10;break; //   0x4002
+  385   2              case REG_SP_FLOW4: SysParam.SampFlow[3] = ((float)PopWord())/10;break; //   0x4003
+  386   2              case REG_SP_FLOW5: SysParam.SampFlow[4] = ((float)PopWord())/10;break; //   0x4004
+  387   2              case REG_SP_FLOW6: SysParam.SampFlow[5] = ((float)PopWord())/10;break; //   0x4005
+  388   2              case REG_SP_FLOW7: SysParam.SampFlow[6] = ((float)PopWord())/10;break; //   0x4006
+C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 7   
+
+  389   2              case REG_SP_FLOW8: SysParam.SampFlow[7] = ((float)PopWord())/10;break; //   0x4007
+  390   2              case REG_SP_ADDR:  SysParam.Address = (BYTE)PopWord();             break; //   0x4008
+  391   2              case REG_SP_TIME:  SysParam.SampTime = PopWord();                  break; //   0x4009
+  392   2              case REG_SP_VOL:   SysParam.SampVol = ((float)PopWord())/10;       break; //   0x400A
+  393   2              case REG_SP_LIGHT: SetBkLight(true);                               break; //   0x400B
+  394   2              case REG_SP_THRES: SysParam.AlarmThres = (BYTE)PopWord();          break; //   0x400C
+  395   2              case REG_SP_MODE:   SetSampMode();                                 break; //   0x400D
+  396   2              case REG_CH_ONOFF: SysParam.Enable = (BYTE)PopWord();              break;
+  397   2              case REG_SP_RET:    ModeHint(); UpdataUI(); SaveParam();           break;   // µã»÷²ÎÊý½çÃæ·µ»Ø°´
+             -Å¥
+  398   2      
+  399   2              // ÐÞ¸ÄÊ±¼ä
+  400   2              case REG_ADJ_TIME:   GetInputTime();                               break;    // Ê±¼äÐÞ¸ÄÍê³É£¬µã»
+             -÷ÁË·µ»Ø°´Å¥
+  401   2              case REG_DATE_TIME:  SetLcdTime();                                 break;      // ÐÞ¸ÄÆÁÄ»RTC    
+             -  
+  402   2              case LCD_REG_RTC:    SetCurTime();                                 break;      // »ñÈ¡ÆÁÄ»Ê±¼ä·µ»
+             -Ø
+  403   2      
+  404   2              // IO ²âÊÔ
+  405   2              case REG_IO_BUMP:   g_Output[GAS_BUMP]  = (BYTE)PopWord();   ShowTemp(TEMPER_Val);      break; //
+             - 0x5000
+  406   2              case REG_IO_BLUE:   g_Output[LIGHT_BLUE]  = (BYTE)PopWord(); ShowTemp(TEMPER_Val);      break; //
+             - 0x5001
+  407   2              case REG_IO_YELLOW: g_Output[LIGHT_YELLOW]  = (BYTE)PopWord();ShowTemp(TEMPER_Val);     break; //
+             - 0x5002
+  408   2              case REG_IO_SOUND:  g_Output[ALARM_SOUND]  = (BYTE)PopWord(); ShowTemp(TEMPER_Val);     break; //
+             - 0x5004
+  409   2              case REG_IO_FAN:    ((BYTE)PopWord())?FANS_M(1):FANS_M(0);    ShowTemp(TEMPER_Val);     break; //
+             - 0x5005
+  410   2              // ¹ØÓÚ½çÃæ
+  411   2              // case REG_CH_COUNT:  SetChCount();  break;  // È¡ÏûÁË£¬¸Äµ½²ÎÊýÉèÖÃ½çÃæÁË
+  412   2              
+  413   2          }
+  414   1      
+  415   1      }
+  416          
+  417          
+  418          void WriteReg()
+  419          {
+  420   1          #if 0
+                   LCD_FRAME *pFrame = (LCD_FRAME *)&RecvBuf1[LcdFrameloc];
+                   CString str;
+                   str.Format(_T("Write:0x%04X\r\n"), SwWord(pFrame->Addr));
+                   Log(str);
+                   #endif
+  426   1      }
+  427          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =      2867     ------
+  ecode size           =    ------     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =       392     ------
+  xdata-const size     =    ------     ------
+  edata size           =        85     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 8   
+
+  hconst size          =       419     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
