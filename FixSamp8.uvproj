@@ -350,19 +350,9 @@
               <FilePath>.\Lcd\Lcd.c</FilePath>
             </File>
             <File>
-              <FileName>Lcd.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Lcd\Lcd.h</FilePath>
-            </File>
-            <File>
               <FileName>LcdApp.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Lcd\LcdApp.c</FilePath>
-            </File>
-            <File>
-              <FileName>LcdApp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Lcd\LcdApp.h</FilePath>
             </File>
             <File>
               <FileName>ModBus.c</FileName>
@@ -373,11 +363,6 @@
               <FileName>Temper.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Temperaturn\Temper.c</FilePath>
-            </File>
-            <File>
-              <FileName>Temper.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Temperaturn\Temper.h</FilePath>
             </File>
             <File>
               <FileName>FlowMeter.c</FileName>
@@ -393,21 +378,6 @@
               <FileName>ModBusHost.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\ModBus\ModBusHost.c</FilePath>
-            </File>
-            <File>
-              <FileName>FlowMeter.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\ModBus\FlowMeter.h</FilePath>
-            </File>
-            <File>
-              <FileName>ModBusDev.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\ModBus\ModBusDev.h</FilePath>
-            </File>
-            <File>
-              <FileName>ModBusHost.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\ModBus\ModBusHost.h</FilePath>
             </File>
           </Files>
         </Group>

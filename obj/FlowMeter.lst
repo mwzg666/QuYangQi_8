@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  FlowMeter                                                          29/05/23  09:54:42  PAGE 1   
+C251 COMPILER V5.60.0,  FlowMeter                                                          30/05/23  09:10:23  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE FlowMeter
@@ -66,7 +66,7 @@ stmt  level    source
    55          {
    56   1          BYTE ch;
    57   1          if (!ValidRtuFrame(Buf, Len))
-C251 COMPILER V5.60.0,  FlowMeter                                                          29/05/23  09:54:42  PAGE 2   
+C251 COMPILER V5.60.0,  FlowMeter                                                          30/05/23  09:10:23  PAGE 2   
 
    58   1          {
    59   2              //DebugMsg("Comm err\r\n",10);

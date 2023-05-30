@@ -1,4 +1,4 @@
-C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 1   
+C251 COMPILER V5.60.0,  LcdApp                                                             30/05/23  09:10:23  PAGE 1   
 
 
 C251 COMPILER V5.60.0, COMPILATION OF MODULE LcdApp
@@ -66,7 +66,7 @@ stmt  level    source
    56   1          BYTE i,Cnt = 0;;
    57   1          for (i=0;i<8;i++)
    58   1          {
-C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 2   
+C251 COMPILER V5.60.0,  LcdApp                                                             30/05/23  09:10:23  PAGE 2   
 
    59   2              if (SysParam.Enable & (1<<i))
    60   2              {
@@ -134,7 +134,7 @@ stmt  level    source
   122   1      
   123   1          dat = PopWord();
   124   1          if (dat == 0x31)    // 返回确认
-C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 3   
+C251 COMPILER V5.60.0,  LcdApp                                                             30/05/23  09:10:23  PAGE 3   
 
   125   1          {
   126   2              //TemSendFlag = false;
@@ -202,7 +202,7 @@ stmt  level    source
   188   2          }
   189   1      
   190   1          HideModule(MP_HINT_END);
-C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 4   
+C251 COMPILER V5.60.0,  LcdApp                                                             30/05/23  09:10:23  PAGE 4   
 
   191   1         
   192   1      }
@@ -270,7 +270,7 @@ stmt  level    source
   254   3                  case ALM_FLOW_HIGH:   sprintf(&ChannelStatus[i][0],"流量偏大");             break;
   255   3                  case ALM_FLOW_ABNOR:  sprintf(&ChannelStatus[i][0],"通信异常");             break;
   256   3              }
-C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 5   
+C251 COMPILER V5.60.0,  LcdApp                                                             30/05/23  09:10:23  PAGE 5   
 
   257   2          }
   258   1      
@@ -338,7 +338,7 @@ stmt  level    source
   320   1          LCD_FRAME *pFrame;
   321   1          LCD_DATE_TIME  ldt;
   322   1          
-C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 6   
+C251 COMPILER V5.60.0,  LcdApp                                                             30/05/23  09:10:23  PAGE 6   
 
   323   1          BYTE dt[8] = {0};
   324   1          pFrame = (LCD_FRAME *)&RecvBuf1[LcdFrameloc];
@@ -406,7 +406,7 @@ stmt  level    source
   386   2              case REG_SP_FLOW5: SysParam.SampFlow[4] = ((float)PopWord())/10;break; //   0x4004
   387   2              case REG_SP_FLOW6: SysParam.SampFlow[5] = ((float)PopWord())/10;break; //   0x4005
   388   2              case REG_SP_FLOW7: SysParam.SampFlow[6] = ((float)PopWord())/10;break; //   0x4006
-C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 7   
+C251 COMPILER V5.60.0,  LcdApp                                                             30/05/23  09:10:23  PAGE 7   
 
   389   2              case REG_SP_FLOW8: SysParam.SampFlow[7] = ((float)PopWord())/10;break; //   0x4007
   390   2              case REG_SP_ADDR:  SysParam.Address = (BYTE)PopWord();             break; //   0x4008
@@ -475,7 +475,7 @@ Module Information          Static   Overlayable
   far data size        =    ------     ------
   huge data size       =    ------     ------
   const size           =    ------     ------
-C251 COMPILER V5.60.0,  LcdApp                                                             29/05/23  09:54:42  PAGE 8   
+C251 COMPILER V5.60.0,  LcdApp                                                             30/05/23  09:10:23  PAGE 8   
 
   hconst size          =       419     ------
 End of Module Information.

@@ -114,9 +114,9 @@ typedef struct
 
 
 
-#define MODE_TIME  1   // 定时取样 
-#define MODE_VOL   2   // 定量取样
-#define MODE_MAN   3   // 手动取样
+#define MODE_TIME  1                // 定时取样 
+#define MODE_VOL   2                // 定量取样
+#define MODE_MAN   3                // 手动取样
 
 
 // output port 
@@ -131,39 +131,48 @@ typedef struct
 #define LED_FLASH_TIME    500   // ms
 
 
-#define RUN_LED(x) (x)?(P4 |= (1<<7)):(P4 &= ~(1<<7))    // 板载LED
+#define RUN_LED(x) (x)?(P4 |= (1<<7)):(P4 &= ~(1<<7))     // 板载LED
 
 // 三色LED
-//#define GRE_LED(x) (x)?(P0 |= (1<<2)):(P0 &= ~(1<<2))    // 绿
-//#define YEL_LED(x) (x)?(P0 |= (1<<3)):(P0 &= ~(1<<3))    // 黄
-//#define RED_LED(x) (x)?(P0 |= (1<<4)):(P0 &= ~(1<<4))    // 红
+//#define GRE_LED(x) (x)?(P0 |= (1<<2)):(P0 &= ~(1<<2))     // 绿
+//#define YEL_LED(x) (x)?(P0 |= (1<<3)):(P0 &= ~(1<<3))     // 黄
+//#define RED_LED(x) (x)?(P0 |= (1<<4)):(P0 &= ~(1<<4))     // 红
 
 // 指示灯
-//#define RED_LIGHT(x) (x)?(P4 |= (1<<1)):(P4 &= ~(1<<1))      // 红灯
-#define YEL_LIGHT(x) (x)?(P3 |= (1<<3)):(P3 &= ~(1<<3))      // 黄灯
-#define BLU_LIGHT(x) (x)?(P3 |= (1<<2)):(P3 &= ~(1<<2))      // 蓝灯
+//#define RED_LIGHT(x) (x)?(P4 |= (1<<1)):(P4 &= ~(1<<1))   // 红灯
+#define YEL_LIGHT(x) (x)?(P3 |= (1<<3)):(P3 &= ~(1<<3))   // 黄灯
+#define BLU_LIGHT(x) (x)?(P3 |= (1<<2)):(P3 &= ~(1<<2))   // 蓝灯
 
 
-#define STOP_M(x)     (P6 & (1<<6))      //急停控制
+#define STOP_M(x)   (P6 & (1<<6))                           //急停控制
 
-#define PW_MAIN(x)   (x)?(P6 |= (1<<4)):(P6 &= ~(1<<4))    // 主电源控制
+#define PW_MAIN(x)    (x)?(P6 |= (1<<4)):(P6 &= ~(1<<4))   // 主电源控制
 
 #define RS485_EN1(x)  (x)?(P0 |= (1<<4)):(P0 &= ~(1<<4)) 
 #define RS485_EN2(x)  (x)?(P5 |= (1<<2)):(P5 &= ~(1<<2))
 
-#define BUMP_M(x)    (x)?(P6 |= (1<<7)):(P6 &= ~(1<<7))       //真空泵控制
-#define FANS_M(x)    (x)?(P5 |= (1<<0)):(P5 &= ~(1<<0))       //风扇控制
-#define ALARM(x)     (x)?(P3 |= (1<<4)):(P3 &= ~(1<<4))      // 报警音
+#define BUMP_M(x)   (x)?(P6 |= (1<<7)):(P6 &= ~(1<<7))     //真空泵控制
+#define FANS_M(x)   (x)?(P5 |= (1<<0)):(P5 &= ~(1<<0))     //风扇控制
+#define ALARM(x)    (x)?(P3 |= (1<<4)):(P3 &= ~(1<<4))      // 报警音
+
+#define VALVE1(x)   (x)?(P4 |=(1<<1)):(P4 &= ~(1<<1))       //电磁阀1控制
+#define VALVE2(x)   (x)?(P4 |=(1<<2)):(P4 &= ~(1<<2))       //电磁阀2控制
+#define VALVE3(x)   (x)?(P4 |=(1<<3)):(P4 &= ~(1<<3))       //电磁阀3控制
+#define VALVE4(x)   (x)?(P4 |=(1<<4)):(P4 &= ~(1<<4))       //电磁阀4控制
+#define VALVE5(x)   (x)?(P2 |=(1<<0)):(P2 &= ~(1<<0))       //电磁阀5控制
+#define VALVE6(x)   (x)?(P2 |=(1<<1)):(P2 &= ~(1<<1))       //电磁阀6控制
+#define VALVE7(x)   (x)?(P2 |=(1<<2)):(P2 &= ~(1<<2))       //电磁阀7控制
+#define VALVE8(x)   (x)?(P2 |=(1<<3)):(P2 &= ~(1<<3))       //电磁阀8控制
 
 
-#define POWER_LOCK()      (P4 & (1<<0))       // 开关机锁
-#define LOCK_BIT()      (1<<0)
+#define POWER_LOCK()      (P4 & (1<<0))                     // 开关机锁
+#define LOCK_BIT()        (1<<0)
 
-#define CMD_OUT_CTL      'O'  // 0x4F
-#define CMD_IN_STATUE    'I'  // 0x49
-#define CMD_GET_VER      'M'  // 0x56
-#define CMD_DATA_TT      'T'  // 0x54 数据透传
-#define CMD_SET_ADD      'H'  // 0x48
+#define CMD_OUT_CTL      'O'            // 0x4F
+#define CMD_IN_STATUE    'I'            // 0x49
+#define CMD_GET_VER      'M'            // 0x56
+#define CMD_DATA_TT      'T'            // 0x54 数据透传
+#define CMD_SET_ADD      'H'            // 0x48
 
 
 #define KEY_ALM_CFM      3
@@ -195,6 +204,10 @@ void ParamDef();
 
 void Init();
 void SaveParam();
+void OpenValve();
+void CloseValve();
+
+
 void OpenPump();
 void ClosePump();
 void CheckAlarm();

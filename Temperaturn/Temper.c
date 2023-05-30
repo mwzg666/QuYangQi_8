@@ -124,7 +124,7 @@ uint Get_ADC12bitResult(u8 channel)  //channel = 0~15
 
 void ADC_Temp()
 {
-    TEMPER = Get_ADC12bitResult(4);       //参数0~15,查询方式做一次ADC, 返回值就是结果, == 4096 为错误
+    TEMPER = Get_ADC12bitResult(3);       //参数0~15,查询方式做一次ADC, 返回值就是结果, == 4096 为错误
     TEMPER =  Get_Temperature(TEMPER);    //计算温度值
 
     TEMPER *= 10; 

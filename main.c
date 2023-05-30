@@ -127,16 +127,16 @@ void SysInit()
 void IoInit()
 {
     EAXFR = 1;
-    WTST = 0;  //设置程序指令延时参数，赋值为0可将CPU执行指令的速度设置为最快
+    WTST = 0;   //设置程序指令延时参数，赋值为0可将CPU执行指令的速度设置为最快
 
-    P0M1 = 0x00;   P0M0 |= (1<<4) ;  // P0.0 P0.1 P0.4 推挽输出
-    P1M1 = (1<<4);   P1M0 = 0x00;   //设置为准双向口
-    P2M1 = 0x00;   P2M0 |= (1<<2);   // P2.2 推挽输出
-    P3M1 = 0x00;   P3M0 |= (1<<2)|(1<<3)|(1<<4);   //设置为准双向口
-    P4M1 = (1<<0);   P4M0 = 0x00;   //设置为准双向口
-    P5M1 = 0x00;   P5M0 |= (1<<0) | (1<<2);   //设置为准双向口
-    P6M1 = (1<<5)|(1<<6); P6M0 |= (1<<4) | (1<<7);   //设置为准双向口
-    P7M1 = 0x00;   P7M0 = 0x00;   //设置为准双向口
+    P0M1 = 0x00;   P0M0 |= (1<<4) ;                     // P0.0 P0.1 P0.4 推挽输出
+    P1M1 = (1<<4)|(1<<3);   P1M0 = 0x00;                       //设置为准双向口
+    P2M1 = 0x00;   P2M0 |= 0x00;                      // P2.2 推挽输出
+    P3M1 = 0x00;   P3M0 |= (1<<2)|(1<<3)|(1<<4);        //设置为准双向口
+    P4M1 = (1<<0);   P4M0 = 0x00;                       //设置为准双向口
+    P5M1 = 0x00;   P5M0 |= (1<<0) | (1<<2);             //设置为准双向口
+    P6M1 = (1<<6); P6M0 |= (1<<4) | (1<<7);     //设置为准双向口
+    P7M1 = 0x00;   P7M0 = 0x00;                         //设置为准双向口
 }
 
 
@@ -237,6 +237,7 @@ void OutCtl(alt_u8 id, alt_u8 st)
         
         case GAS_BUMP:      //泵
         {
+            OpenValve();
             (st)? BUMP_M(1) : BUMP_M(0);
             break;
         }
@@ -637,13 +638,13 @@ void LedInit()
     //RED_LED(0);    // 红
 
     // 指示灯
-    //RED_LIGHT(0);  // 红灯
-    YEL_LIGHT(0);  // 黄灯
-    BLU_LIGHT(0);  // 蓝灯
-
-    BUMP_M(0);     //泵
-    FANS_M(0);     //风扇
-    ALARM(0);      // 报警音
+    //RED_LIGHT(0); // 红灯
+    YEL_LIGHT(0);   // 黄灯
+    BLU_LIGHT(0);   // 蓝灯
+    CloseValve();   // 电磁阀
+    BUMP_M(0);      // 泵
+    FANS_M(0);      // 风扇
+    ALARM(0);       // 报警音
 }
 
 
@@ -909,10 +910,39 @@ void MainTask()
 }
 */
 
+
+void OpenValve()
+{
+    VALVE1(1);
+    VALVE2(1);
+    VALVE3(1);
+    VALVE4(1);
+    VALVE5(1);
+    VALVE6(1);
+    VALVE7(1);
+    VALVE8(1);
+    Delay(20);
+}
+
+void CloseValve()
+{
+    VALVE1(0);
+    VALVE2(0);
+    VALVE3(0);
+    VALVE4(0);
+    VALVE5(0);
+    VALVE6(0);
+    VALVE7(0);
+    VALVE8(0);
+    Delay(20);
+}
+
+
 // 开启气泵
 void OpenPump()
 {
     //BUMP_M(1);
+    OpenValve();
     g_Output[GAS_BUMP] = 1;
 }
 
@@ -921,6 +951,7 @@ void OpenPump()
 void ClosePump()
 {
     //BUMP_M(0);
+    CloseValve();
     g_Output[GAS_BUMP] = 0;
 }
 
